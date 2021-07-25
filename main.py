@@ -1,12 +1,27 @@
 import requests
 from bs4 import BeautifulSoup
+import time
+import pandas as pd
 
+w211 = []
 
-url = 'https://mobil.mitula.co.id/searchC/q-mercedes-benz-w211?req_sgmt=REVTS1RPUDtVU0VSX1NFQVJDSDtTRVJQOw=='
-headers = {
-    'User-Agent':
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.164 Safari/537.36'
-}
+for x in range(1,8):
+    url = 'https://mobil.mitula.co.id/searchC/sortir-0/q-mercedes-benz-w211/halaman-'
+    r = requests.get(url+str(x))
+    soup = BeautifulSoup(r.text, 'html.parser')
+    cars = soup.find_all('a', {'class': 'lis_ting_AdContainer'})
+    for car in cars:
+        name = car.find('h4').text
+        price = car.find('div',{'class': 'adPrice'}).text
+        car_info = {
+            'name': name,
+            'price': price
+        }
+        w211.append(car_info)
+    print('Used W211 Found:', len(w211))
+    time.sleep(1)
 
-r = requests.get(url, headers=headers)
-print(r.status_code)
+df = pd.DataFrame(w211)
+print(df.head())
+
+df.to_csv('w211.csv')
